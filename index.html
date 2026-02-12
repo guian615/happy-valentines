@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Valentines Day Jelly</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #fce4ec;
+            --text-red: #a33131;
+            --btn-yes: #f3a6ad;
+            --piece-size: 100px; 
+            --board-width: 400px;
+            --board-height: 200px;
+        }
+
+        body {
+            background: #F7EBF4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        h1 { color: var(--text-red); font-style: italic; margin-bottom: 20px; }
+
+        .card {
+            width: 450px;
+            height: 320px;
+            background: white;
+            border: 1px solid #ddd;
+            text-align: center;
+            padding: 15px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            z-index: 2;
+            margin: 20px auto;
+        }
+
+        .puzzle-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 2px;
+            width: var(--board-width);
+            height: var(--board-height);
+            margin: 15px auto;
+            background: #f9f9f9;
+            border: 3px dashed #bbb;
+        }
+
+        .drop-zone { 
+            width: var(--piece-size); 
+            height: var(--piece-size); 
+        }
+
+        .pieces-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            width: 80%;
+            max-width: 600px;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 20px;
+            min-height: 120px;
+        }
+
+        .piece {
+            width: var(--piece-size);
+            height: var(--piece-size);
+            cursor: grab;
+            background-image: url('https://i.pinimg.com/736x/19/45/c1/1945c1082ae883afa246d71eeefe6c40.jpg'); 
+            background-size: var(--board-width) var(--board-height);
+            border: 1px solid #333;
+            touch-action: none;
+        }
+
+        /* Alignment for 4x2 grid */
+        .p0 { background-position: 0 0; }
+        .p1 { background-position: -100px 0; }
+        .p2 { background-position: -200px 0; }
+        .p3 { background-position: -300px 0; }
+        .p4 { background-position: 0 -100px; }
+        .p5 { background-position: -100px -100px; }
+        .p6 { background-position: -200px -100px; }
+        .p7 { background-position: -300px -100px; }
+
+        .controls { margin-top: 30px; text-align: center; }
+        
+        .btn-group { 
+            display: flex; 
+            gap: 20px; 
+            justify-content: center;
+            height: 60px; 
+            position: relative;
+        }
+
+        button {
+            padding: 10px 25px;
+            border: 2px solid #FAF7F7;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        #noBtn { transition: all 0.2s ease; position: relative; }
+
+        .yes:not(:disabled) { 
+            background: linear-gradient(to right, #ff416c, #ff4b2b); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
+        }
+
+        .no:not(:disabled) { background-color: #F56767; color: whitesmoke; }
+
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        #celebration { 
+            display: none; 
+            text-align: center; 
+            animation: fadeIn 1s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .success-text {
+            font-size: 3rem;
+            color: #black;
+            text-shadow: 2px 2px gold;
+        }
+
+        .bg-hearts {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="questionArea">
+    <h1>Solve the puzzle to unlock my question!</h1>
+    <div class="card">
+        <div class="puzzle-board" id="board">
+            <div class="drop-zone" data-index="0"></div>
+            <div class="drop-zone" data-index="1"></div>
+            <div class="drop-zone" data-index="2"></div>
+            <div class="drop-zone" data-index="3"></div>
+            <div class="drop-zone" data-index="4"></div>
+            <div class="drop-zone" data-index="5"></div>
+            <div class="drop-zone" data-index="6"></div>
+            <div class="drop-zone" data-index="7"></div>
+        </div>
+    </div>
+
+    <div class="pieces-pool" id="pool"></div>
+
+    <div class="controls">
+        <h2 style="color: deeppink;">Will you be my Valentine?</h2>
+        <div class="btn-group">
+            <button class="yes" id="yesBtn" onclick="celebrate()" disabled>YES🙊</button>
+            <button class="no" id="noBtn" disabled>NO🙅🏻‍♂️</button>
+        </div>
+        <p id="status-msg">Puzzle is scrambled! Drag pieces to the card.</p>
+    </div>
+</div>
+
+<div id="celebration">
+    <h1 class="success-text">I KNEW IT! ❤️ RAWWWWRRRRR👉🏾👌🏻</h1>
+    <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZDhidHQ5aDI1dzA4cXhqY3R3cnB2Zjhpcm9iNzc5dGkzazZzajVtOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/124ySNrM8Rt8go/giphy.gif" alt="Happy Dance" style="border-radius: 20px; max-width: 300px;">
+</div>
+
+<div class="bg-hearts" id="bg-hearts"></div>
+
+<script>
+    const pool = document.getElementById('pool');
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const statusMsg = document.getElementById('status-msg');
+    let solvedPieces = 0;
+    const totalPieces = 8;
+
+    // Initialize Pieces
+    const pieceIndices = [0, 1, 2, 3, 4, 5, 6, 7];
+    pieceIndices.sort(() => Math.random() - 0.5);
+
+    pieceIndices.forEach(idx => {
+        const piece = document.createElement('div');
+        piece.classList.add('piece', `p${idx}`);
+        piece.setAttribute('draggable', 'true');
+        piece.setAttribute('id', `piece-${idx}`);
+        piece.dataset.index = idx;
+
+        piece.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', e.target.id);
+        });
+        pool.appendChild(piece);
+    });
+
+    // Drop Logic
+    const zones = document.querySelectorAll('.drop-zone');
+    zones.forEach(zone => {
+        zone.addEventListener('dragover', (e) => e.preventDefault());
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text/plain');
+            const draggedPiece = document.getElementById(id);
+            
+            if (draggedPiece.dataset.index === zone.dataset.index) {
+                zone.appendChild(draggedPiece);
+                draggedPiece.setAttribute('draggable', 'false');
+                draggedPiece.style.cursor = 'default';
+                solvedPieces++;
+                checkWin();
+            } else {
+                statusMsg.innerText = "Oops! That's not where that goes.";
+                setTimeout(() => { if(solvedPieces < totalPieces) statusMsg.innerText = "Keep trying!"; }, 1500);
+            }
+        });
+    });
+
+    function checkWin() {
+        if (solvedPieces === totalPieces) {
+            yesBtn.disabled = false;
+            noBtn.disabled = false;
+            statusMsg.innerText = "Puzzle Solved! ❤️ Now, answer the question...";
+            statusMsg.style.color = "green";
+        }
+    }
+
+    // No Button Dodge
+    noBtn.addEventListener('mouseover', () => {
+        if (!noBtn.disabled) {
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (window.innerHeight - 50);
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = x + 'px';
+            noBtn.style.top = y + 'px';
+        }
+    });
+
+    function celebrate() {
+        document.getElementById('questionArea').style.display = 'none';
+        document.getElementById('celebration').style.display = 'block';
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+    }
+
+    // Background Hearts
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.innerHTML = '❤️';
+        heart.style.position = 'fixed';
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.top = '100vh';
+        heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+        heart.style.transition = `transform ${Math.random() * 3 + 2}s linear`;
+        document.getElementById('bg-hearts').appendChild(heart);
+
+        setTimeout(() => {
+            heart.style.transform = `translateY(-110vh) rotate(${Math.random() * 360}deg)`;
+        }, 100);
+        setTimeout(() => { heart.remove(); }, 5000);
+    }
+    setInterval(createHeart, 300);
+</script>
+
+</body>
+</html>
