@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Happy Valentines Day Jelly</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -10,9 +10,10 @@
             --bg-color: #fce4ec;
             --text-red: #a33131;
             --btn-yes: #f3a6ad;
-            --piece-size: 100px; 
-            --board-width: 400px;
-            --board-height: 200px;
+            /* Scale based on screen width - 80px for mobile, 100px for desktop */
+            --piece-size: clamp(70px, 18vw, 100px); 
+            --board-width: calc(var(--piece-size) * 4);
+            --board-height: calc(var(--piece-size) * 2);
         }
 
         body {
@@ -23,54 +24,55 @@
             min-height: 100vh;
             margin: 0;
             font-family: 'Segoe UI', sans-serif;
-            padding: 20px;
+            padding: 10px;
             overflow-x: hidden;
+            touch-action: manipulation;
         }
 
-        h1 { color: var(--text-red); font-style: italic; margin-bottom: 20px; }
+        h1 { color: var(--text-red); font-style: italic; font-size: 1.2rem; text-align: center; margin: 10px 0; }
 
         .card {
-            width: 450px;
-            height: 320px;
+            width: 95%;
+            max-width: 450px;
             background: white;
             border: 1px solid #ddd;
             text-align: center;
-            padding: 15px;
+            padding: 10px;
             box-sizing: border-box;
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
             z-index: 2;
-            margin: 20px auto;
+            margin: 10px auto;
         }
 
         .puzzle-board {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(2, 1fr);
-            gap: 2px;
             width: var(--board-width);
             height: var(--board-height);
-            margin: 15px auto;
+            margin: 10px auto;
             background: #f9f9f9;
-            border: 3px dashed #bbb;
+            border: 2px dashed #bbb;
         }
 
         .drop-zone { 
             width: var(--piece-size); 
             height: var(--piece-size); 
+            box-sizing: border-box;
+            border: 1px solid #eee;
         }
 
         .pieces-pool {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 10px;
             justify-content: center;
-            width: 80%;
-            max-width: 600px;
-            margin-top: 20px;
-            padding: 20px;
+            width: 90%;
+            margin-top: 10px;
+            padding: 15px;
             background: rgba(255,255,255,0.4);
             border-radius: 20px;
-            min-height: 120px;
+            min-height: 100px;
         }
 
         .piece {
@@ -80,75 +82,46 @@
             background-image: url('https://i.pinimg.com/736x/19/45/c1/1945c1082ae883afa246d71eeefe6c40.jpg'); 
             background-size: var(--board-width) var(--board-height);
             border: 1px solid #333;
-            touch-action: none;
+            touch-action: none; /* Critical for mobile dragging */
+            user-select: none;
         }
 
-        /* Alignment for 4x2 grid */
+        /* Dynamic background positions */
         .p0 { background-position: 0 0; }
-        .p1 { background-position: -100px 0; }
-        .p2 { background-position: -200px 0; }
-        .p3 { background-position: -300px 0; }
-        .p4 { background-position: 0 -100px; }
-        .p5 { background-position: -100px -100px; }
-        .p6 { background-position: -200px -100px; }
-        .p7 { background-position: -300px -100px; }
+        .p1 { background-position: calc(var(--piece-size) * -1) 0; }
+        .p2 { background-position: calc(var(--piece-size) * -2) 0; }
+        .p3 { background-position: calc(var(--piece-size) * -3) 0; }
+        .p4 { background-position: 0 calc(var(--piece-size) * -1); }
+        .p5 { background-position: calc(var(--piece-size) * -1) calc(var(--piece-size) * -1); }
+        .p6 { background-position: calc(var(--piece-size) * -2) calc(var(--piece-size) * -1); }
+        .p7 { background-position: calc(var(--piece-size) * -3) calc(var(--piece-size) * -1); }
 
-        .controls { margin-top: 30px; text-align: center; }
-        
-        .btn-group { 
-            display: flex; 
-            gap: 20px; 
-            justify-content: center;
-            height: 60px; 
-            position: relative;
-        }
+        .controls { margin-top: 20px; text-align: center; width: 100%; }
+        .btn-group { display: flex; gap: 15px; justify-content: center; height: 50px; position: relative; }
 
         button {
-            padding: 10px 25px;
+            padding: 8px 20px;
             border: 2px solid #FAF7F7;
             border-radius: 15px;
             font-weight: bold;
-            cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
-        #noBtn { transition: all 0.2s ease; position: relative; }
-
-        .yes:not(:disabled) { 
-            background: linear-gradient(to right, #ff416c, #ff4b2b); 
-            color: white; 
-            box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
-        }
-
+        #noBtn { transition: all 0.2s ease; z-index: 10; }
+        .yes:not(:disabled) { background: linear-gradient(to right, #ff416c, #ff4b2b); color: white; }
         .no:not(:disabled) { background-color: #F56767; color: whitesmoke; }
+        button:disabled { opacity: 0.5; }
 
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #celebration { display: none; padding: 20px; text-align: center; }
+        .success-text { font-size: 1.8rem; color: black; text-shadow: 1px 1px gold; }
 
-        #celebration { 
-            display: none; 
-            text-align: center; 
-            animation: fadeIn 1s;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .success-text {
-            font-size: 3rem;
-            color: #black;
-            text-shadow: 2px 2px gold;
-        }
-
-        .bg-hearts {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; pointer-events: none;
-        }
+        .bg-hearts { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
     </style>
 </head>
 <body>
 
 <div id="questionArea">
-    <h1>Solve the puzzle to unlock my question!</h1>
+    <h1>Solve the puzzle, Jelly! ❤️</h1>
     <div class="card">
         <div class="puzzle-board" id="board">
             <div class="drop-zone" data-index="0"></div>
@@ -165,18 +138,18 @@
     <div class="pieces-pool" id="pool"></div>
 
     <div class="controls">
-        <h2 style="color: deeppink;">Will you be my Valentine?</h2>
+        <h2 style="color: deeppink; font-size: 1.2rem;">Will you be my Valentine?</h2>
         <div class="btn-group">
             <button class="yes" id="yesBtn" onclick="celebrate()" disabled>YES🙊</button>
-            <button class="no" id="noBtn" disabled>NO🙅🏻‍♂️</button>
+            <button class="no" id="noBtn" onclick="moveNoBtn()" disabled>NO🙅🏻‍♂️</button>
         </div>
-        <p id="status-msg">Puzzle is scrambled! Drag pieces to the card.</p>
+        <p id="status-msg" style="font-size: 0.9rem;">Drag pieces into the box!</p>
     </div>
 </div>
 
 <div id="celebration">
     <h1 class="success-text">I KNEW IT! ❤️ RAWWWWRRRRR👉🏾👌🏻</h1>
-    <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZDhidHQ5aDI1dzA4cXhqY3R3cnB2Zjhpcm9iNzc5dGkzazZzajVtOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/124ySNrM8Rt8go/giphy.gif" alt="Happy Dance" style="border-radius: 20px; max-width: 300px;">
+    <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZDhidHQ5aDI1dzA4cXhqY3R3cnB2Zjhpcm9iNzc5dGkzazZzajVtOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/124ySNrM8Rt8go/giphy.gif" alt="Happy Dance" style="border-radius: 20px; width: 100%; max-width: 300px;">
 </div>
 
 <div class="bg-hearts" id="bg-hearts"></div>
@@ -189,92 +162,129 @@
     let solvedPieces = 0;
     const totalPieces = 8;
 
-    // Initialize Pieces
+    // --- Piece Initialization ---
     const pieceIndices = [0, 1, 2, 3, 4, 5, 6, 7];
     pieceIndices.sort(() => Math.random() - 0.5);
 
     pieceIndices.forEach(idx => {
         const piece = document.createElement('div');
         piece.classList.add('piece', `p${idx}`);
-        piece.setAttribute('draggable', 'true');
-        piece.setAttribute('id', `piece-${idx}`);
         piece.dataset.index = idx;
+        piece.id = `piece-${idx}`;
+        
+        // Desktop Drag
+        piece.setAttribute('draggable', 'true');
+        piece.addEventListener('dragstart', (e) => e.dataTransfer.setData('text', e.target.id));
+        
+        // Mobile Touch Support
+        piece.addEventListener('touchstart', touchStart, {passive: false});
+        piece.addEventListener('touchmove', touchMove, {passive: false});
+        piece.addEventListener('touchend', touchEnd);
 
-        piece.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('text/plain', e.target.id);
-        });
         pool.appendChild(piece);
     });
 
-    // Drop Logic
-    const zones = document.querySelectorAll('.drop-zone');
-    zones.forEach(zone => {
-        zone.addEventListener('dragover', (e) => e.preventDefault());
-        zone.addEventListener('drop', (e) => {
+    // --- Touch Logic ---
+    let activePiece = null;
+    let offsetX, offsetY;
+
+    function touchStart(e) {
+        if(this.parentElement.classList.contains('drop-zone')) return;
+        activePiece = this;
+        const touch = e.touches[0];
+        const rect = activePiece.getBoundingClientRect();
+        offsetX = touch.clientX - rect.left;
+        offsetY = touch.clientY - rect.top;
+        activePiece.style.position = 'fixed';
+        activePiece.style.zIndex = '1000';
+    }
+
+    function touchMove(e) {
+        if (!activePiece) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        activePiece.style.left = (touch.clientX - offsetX) + 'px';
+        activePiece.style.top = (touch.clientY - offsetY) + 'px';
+    }
+
+    function touchEnd(e) {
+        if (!activePiece) return;
+        activePiece.style.display = 'none'; // Temporarily hide to find element underneath
+        const elementBelow = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+        activePiece.style.display = 'block';
+        
+        const zone = elementBelow ? elementBelow.closest('.drop-zone') : null;
+        
+        if (zone && zone.dataset.index === activePiece.dataset.index && !zone.hasChildNodes()) {
+            snapToZone(activePiece, zone);
+        } else {
+            // Reset position
+            activePiece.style.position = 'static';
+            activePiece.style.zIndex = '1';
+        }
+        activePiece = null;
+    }
+
+    // --- Drop Logic (Desktop) ---
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('dragover', e => e.preventDefault());
+        zone.addEventListener('drop', e => {
             e.preventDefault();
-            const id = e.dataTransfer.getData('text/plain');
-            const draggedPiece = document.getElementById(id);
-            
-            if (draggedPiece.dataset.index === zone.dataset.index) {
-                zone.appendChild(draggedPiece);
-                draggedPiece.setAttribute('draggable', 'false');
-                draggedPiece.style.cursor = 'default';
-                solvedPieces++;
-                checkWin();
+            const id = e.dataTransfer.getData('text');
+            const piece = document.getElementById(id);
+            if (piece.dataset.index === zone.dataset.index) {
+                snapToZone(piece, zone);
             } else {
-                statusMsg.innerText = "Oops! That's not where that goes.";
-                setTimeout(() => { if(solvedPieces < totalPieces) statusMsg.innerText = "Keep trying!"; }, 1500);
+                statusMsg.innerText = "❌ Wrong spot!";
+                setTimeout(() => statusMsg.innerText = "Keep going!", 1000);
             }
         });
     });
 
-    function checkWin() {
+    function snapToZone(piece, zone) {
+        zone.appendChild(piece);
+        piece.style.position = 'static';
+        piece.setAttribute('draggable', 'false');
+        piece.style.cursor = 'default';
+        piece.removeEventListener('touchstart', touchStart);
+        solvedPieces++;
         if (solvedPieces === totalPieces) {
             yesBtn.disabled = false;
             noBtn.disabled = false;
-            statusMsg.innerText = "Puzzle Solved! ❤️ Now, answer the question...";
+            statusMsg.innerText = "Puzzle Solved! ❤️ Answer now!";
             statusMsg.style.color = "green";
         }
     }
 
-    // No Button Dodge
-    noBtn.addEventListener('mouseover', () => {
-        if (!noBtn.disabled) {
-            const x = Math.random() * (window.innerWidth - 100);
-            const y = Math.random() * (window.innerHeight - 50);
-            noBtn.style.position = 'fixed';
-            noBtn.style.left = x + 'px';
-            noBtn.style.top = y + 'px';
-        }
-    });
+    // --- No Button Dodge ---
+    function moveNoBtn() {
+        const x = Math.random() * (window.innerWidth - 80);
+        const y = Math.random() * (window.innerHeight - 40);
+        noBtn.style.position = 'fixed';
+        noBtn.style.left = x + 'px';
+        noBtn.style.top = y + 'px';
+    }
+    noBtn.addEventListener('mouseover', moveNoBtn);
 
     function celebrate() {
         document.getElementById('questionArea').style.display = 'none';
         document.getElementById('celebration').style.display = 'block';
-        confetti({
-            particleCount: 150,
-            spread: 70,
-            origin: { y: 0.6 }
-        });
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     }
 
-    // Background Hearts
     function createHeart() {
         const heart = document.createElement('div');
         heart.innerHTML = '❤️';
         heart.style.position = 'fixed';
         heart.style.left = Math.random() * 100 + 'vw';
         heart.style.top = '100vh';
-        heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+        heart.style.fontSize = '15px';
         heart.style.transition = `transform ${Math.random() * 3 + 2}s linear`;
         document.getElementById('bg-hearts').appendChild(heart);
-
-        setTimeout(() => {
-            heart.style.transform = `translateY(-110vh) rotate(${Math.random() * 360}deg)`;
-        }, 100);
-        setTimeout(() => { heart.remove(); }, 5000);
+        setTimeout(() => heart.style.transform = `translateY(-110vh) rotate(360deg)`, 100);
+        setTimeout(() => heart.remove(), 5000);
     }
-    setInterval(createHeart, 300);
+    setInterval(createHeart, 400);
 </script>
 
 </body>
