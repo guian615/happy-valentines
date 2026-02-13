@@ -10,10 +10,11 @@
             --bg-color: #fce4ec;
             --text-red: #a33131;
             --btn-yes: #f3a6ad;
-            /* Scale based on screen width - 80px for mobile, 100px for desktop */
             --piece-size: clamp(70px, 18vw, 100px); 
             --board-width: calc(var(--piece-size) * 4);
             --board-height: calc(var(--piece-size) * 2);
+            --envelope-color: #f44336;
+            --envelope-light: #ff5252;
         }
 
         body {
@@ -29,6 +30,8 @@
             touch-action: manipulation;
         }
 
+        /* --- Puzzle Area (Original Functionality) --- */
+        #questionArea { width: 100%; display: flex; flex-direction: column; align-items: center; }
         h1 { color: var(--text-red); font-style: italic; font-size: 1.2rem; text-align: center; margin: 10px 0; }
 
         .card {
@@ -55,38 +58,21 @@
             border: 2px dashed #bbb;
         }
 
-        .drop-zone { 
-            width: var(--piece-size); 
-            height: var(--piece-size); 
-            box-sizing: border-box;
-            border: 1px solid #eee;
-        }
+        .drop-zone { width: var(--piece-size); height: var(--piece-size); border: 1px solid #eee; }
 
         .pieces-pool {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            width: 90%;
-            margin-top: 10px;
-            padding: 15px;
-            background: rgba(255,255,255,0.4);
-            border-radius: 20px;
-            min-height: 100px;
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+            width: 90%; margin-top: 10px; padding: 15px;
+            background: rgba(255,255,255,0.4); border-radius: 20px; min-height: 100px;
         }
 
         .piece {
-            width: var(--piece-size);
-            height: var(--piece-size);
-            cursor: grab;
+            width: var(--piece-size); height: var(--piece-size); cursor: grab;
             background-image: url('https://i.pinimg.com/736x/19/45/c1/1945c1082ae883afa246d71eeefe6c40.jpg'); 
             background-size: var(--board-width) var(--board-height);
-            border: 1px solid #333;
-            touch-action: none; /* Critical for mobile dragging */
-            user-select: none;
+            border: 1px solid #333; touch-action: none;
         }
 
-        /* Dynamic background positions */
         .p0 { background-position: 0 0; }
         .p1 { background-position: calc(var(--piece-size) * -1) 0; }
         .p2 { background-position: calc(var(--piece-size) * -2) 0; }
@@ -98,22 +84,72 @@
 
         .controls { margin-top: 20px; text-align: center; width: 100%; }
         .btn-group { display: flex; gap: 15px; justify-content: center; height: 50px; position: relative; }
+        
+        button { padding: 8px 20px; border: 2px solid #FAF7F7; border-radius: 15px; font-weight: bold; }
+        #noBtn { transition: all 0.2s ease; z-index: 10; }
+        .yes:not(:disabled) { background: linear-gradient(to right, #ff416c, #ff4b2b); color: white; cursor: pointer; }
+        .no:not(:disabled) { background-color: #F56767; color: whitesmoke; }
 
-        button {
-            padding: 8px 20px;
-            border: 2px solid #FAF7F7;
-            border-radius: 15px;
-            font-weight: bold;
-            font-size: 1rem;
+        /* --- UPDATED: Full Page Centering for Celebration --- */
+        #celebration { 
+            display: none; 
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #F7EBF4;
+            z-index: 100;
         }
 
-        #noBtn { transition: all 0.2s ease; z-index: 10; }
-        .yes:not(:disabled) { background: linear-gradient(to right, #ff416c, #ff4b2b); color: white; }
-        .no:not(:disabled) { background-color: #F56767; color: whitesmoke; }
-        button:disabled { opacity: 0.5; }
+        #celebText { font-size: 1.5rem; color: black; text-shadow: 1px 1px gold; margin: 20px; }
+        #celebGif { border-radius: 20px; width: 80%; max-width: 250px; }
 
-        #celebration { display: none; padding: 20px; text-align: center; }
-        .success-text { font-size: 1.8rem; color: black; text-shadow: 1px 1px gold; }
+        /* --- UPDATED: Responsive Envelope --- */
+        .envelope-wrapper {
+            position: relative;
+            width: clamp(200px, 60vw, 300px); /* Responsive size */
+            aspect-ratio: 3/2;
+            background: var(--envelope-color);
+            cursor: pointer;
+            margin-top: 30px;
+            transition: transform 0.6s ease;
+        }
+
+        .envelope-wrapper:before {
+            content: ""; position: absolute; top: 0; left: 0;
+            width: 0; height: 0;
+            border-left: calc(clamp(200px, 60vw, 300px) / 2) solid transparent;
+            border-right: calc(clamp(200px, 60vw, 300px) / 2) solid transparent;
+            border-top: calc(clamp(200px, 60vw, 300px) * 0.4) solid var(--envelope-light);
+            z-index: 5; transition: transform 0.5s; transform-origin: top;
+        }
+
+        .envelope-wrapper.open:before { transform: rotateX(180deg); z-index: 0; }
+        .envelope-wrapper.open { transform: translateY(20%); } /* Shift down to center the photos */
+
+        .photo-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .photo {
+            position: absolute;
+            width: clamp(100px, 30vw, 160px); /* Responsive photos */
+            aspect-ratio: 1/1;
+            background: white; padding: 5px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            opacity: 0; transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .photo img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Animation when opened - Centered Staggered Pop */
+        .envelope-wrapper.open .photo { opacity: 1; }
+        .envelope-wrapper.open .p1 { transform: translate(-50%, -120%) rotate(-10deg); }
+        .envelope-wrapper.open .p2 { transform: translate(20%, -140%) rotate(10deg); transition-delay: 0.2s; }
+        .envelope-wrapper.open .p3 { transform: translate(-80%, -100%) rotate(-5deg); transition-delay: 0.4s; }
 
         .bg-hearts { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
     </style>
@@ -134,22 +170,28 @@
             <div class="drop-zone" data-index="7"></div>
         </div>
     </div>
-
     <div class="pieces-pool" id="pool"></div>
-
     <div class="controls">
         <h2 style="color: deeppink; font-size: 1.2rem;">Will you be my Valentine?</h2>
         <div class="btn-group">
             <button class="yes" id="yesBtn" onclick="celebrate()" disabled>YES🙊</button>
-            <button class="no" id="noBtn" onclick="moveNoBtn()" disabled>NO🙅🏻‍♂️</button>
+            <button class="no" id="noBtn" onmouseover="moveNoBtn()" onclick="moveNoBtn()" disabled>NO🙅🏻‍♂️</button>
         </div>
         <p id="status-msg" style="font-size: 0.9rem;">Drag pieces into the box!</p>
     </div>
 </div>
 
 <div id="celebration">
-    <h1 class="success-text">I KNEW IT! ❤️ RAWWWWRRRRR👉🏾👌🏻</h1>
-    <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZDhidHQ5aDI1dzA4cXhqY3R3cnB2Zjhpcm9iNzc5dGkzazZzajVtOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/124ySNrM8Rt8go/giphy.gif" alt="Happy Dance" style="border-radius: 20px; width: 100%; max-width: 300px;">
+    <h1 id="celebText">I KNEW IT! ❤️ RAWWWWRRRRR👉🏾👌🏻</h1>
+    <img id="celebGif" src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZDhidHQ5aDI1dzA4cXhqY3R3cnB2Zjhpcm9iNzc5dGkzazZzajVtOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/124ySNrM8Rt8go/giphy.gif" alt="Happy Dance">
+    
+    <div class="envelope-wrapper" id="envelope" onclick="openEnvelope()">
+        <div class="photo-container">
+            <div class="photo p1"><img src="photo1.jpg" alt="Memory 1"></div>
+            <div class="photo p2"><img src="photo2.jpg" alt="Memory 2"></div>
+            <div class="photo p3"><img src="photo3.jpg" alt="Memory 3"></div>
+        </div>
+    </div>
 </div>
 
 <div class="bg-hearts" id="bg-hearts"></div>
@@ -162,7 +204,7 @@
     let solvedPieces = 0;
     const totalPieces = 8;
 
-    // --- Piece Initialization ---
+    // Piece logic
     const pieceIndices = [0, 1, 2, 3, 4, 5, 6, 7];
     pieceIndices.sort(() => Math.random() - 0.5);
 
@@ -171,23 +213,16 @@
         piece.classList.add('piece', `p${idx}`);
         piece.dataset.index = idx;
         piece.id = `piece-${idx}`;
-        
-        // Desktop Drag
         piece.setAttribute('draggable', 'true');
         piece.addEventListener('dragstart', (e) => e.dataTransfer.setData('text', e.target.id));
-        
-        // Mobile Touch Support
         piece.addEventListener('touchstart', touchStart, {passive: false});
         piece.addEventListener('touchmove', touchMove, {passive: false});
         piece.addEventListener('touchend', touchEnd);
-
         pool.appendChild(piece);
     });
 
-    // --- Touch Logic ---
     let activePiece = null;
     let offsetX, offsetY;
-
     function touchStart(e) {
         if(this.parentElement.classList.contains('drop-zone')) return;
         activePiece = this;
@@ -198,7 +233,6 @@
         activePiece.style.position = 'fixed';
         activePiece.style.zIndex = '1000';
     }
-
     function touchMove(e) {
         if (!activePiece) return;
         e.preventDefault();
@@ -206,38 +240,27 @@
         activePiece.style.left = (touch.clientX - offsetX) + 'px';
         activePiece.style.top = (touch.clientY - offsetY) + 'px';
     }
-
     function touchEnd(e) {
         if (!activePiece) return;
-        activePiece.style.display = 'none'; // Temporarily hide to find element underneath
-        const elementBelow = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+        activePiece.style.display = 'none';
+        const el = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
         activePiece.style.display = 'block';
-        
-        const zone = elementBelow ? elementBelow.closest('.drop-zone') : null;
-        
+        const zone = el ? el.closest('.drop-zone') : null;
         if (zone && zone.dataset.index === activePiece.dataset.index && !zone.hasChildNodes()) {
             snapToZone(activePiece, zone);
         } else {
-            // Reset position
             activePiece.style.position = 'static';
-            activePiece.style.zIndex = '1';
         }
         activePiece = null;
     }
 
-    // --- Drop Logic (Desktop) ---
     document.querySelectorAll('.drop-zone').forEach(zone => {
         zone.addEventListener('dragover', e => e.preventDefault());
         zone.addEventListener('drop', e => {
             e.preventDefault();
             const id = e.dataTransfer.getData('text');
             const piece = document.getElementById(id);
-            if (piece.dataset.index === zone.dataset.index) {
-                snapToZone(piece, zone);
-            } else {
-                statusMsg.innerText = "❌ Wrong spot!";
-                setTimeout(() => statusMsg.innerText = "Keep going!", 1000);
-            }
+            if (piece.dataset.index === zone.dataset.index) snapToZone(piece, zone);
         });
     });
 
@@ -245,31 +268,35 @@
         zone.appendChild(piece);
         piece.style.position = 'static';
         piece.setAttribute('draggable', 'false');
-        piece.style.cursor = 'default';
-        piece.removeEventListener('touchstart', touchStart);
         solvedPieces++;
         if (solvedPieces === totalPieces) {
             yesBtn.disabled = false;
             noBtn.disabled = false;
             statusMsg.innerText = "Puzzle Solved! ❤️ Answer now!";
-            statusMsg.style.color = "green";
         }
     }
 
-    // --- No Button Dodge ---
     function moveNoBtn() {
-        const x = Math.random() * (window.innerWidth - 80);
-        const y = Math.random() * (window.innerHeight - 40);
+        if (noBtn.disabled) return;
+        const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - 20);
+        const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - 20);
         noBtn.style.position = 'fixed';
         noBtn.style.left = x + 'px';
         noBtn.style.top = y + 'px';
     }
-    noBtn.addEventListener('mouseover', moveNoBtn);
 
     function celebrate() {
         document.getElementById('questionArea').style.display = 'none';
-        document.getElementById('celebration').style.display = 'block';
+        document.getElementById('celebration').style.display = 'flex';
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    }
+
+    function openEnvelope() {
+        // Smoothly clear space for the images
+        document.getElementById('celebText').style.display = 'none';
+        document.getElementById('celebGif').style.display = 'none';
+        document.getElementById('envelope').classList.add('open');
+        confetti({ particleCount: 80, spread: 50, origin: { y: 0.7 } });
     }
 
     function createHeart() {
@@ -286,6 +313,5 @@
     }
     setInterval(createHeart, 400);
 </script>
-
 </body>
 </html>
