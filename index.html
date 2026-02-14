@@ -10,7 +10,8 @@
             --bg-color: #fce4ec;
             --text-red: #a33131;
             --btn-yes: #f3a6ad;
-            --piece-size: clamp(70px, 18vw, 100px); 
+            /* Adjust piece size based on screen width */
+            --piece-size: clamp(65px, 20vw, 100px); 
             --board-width: calc(var(--piece-size) * 4);
             --board-height: calc(var(--piece-size) * 2);
             --envelope-color: #f44336;
@@ -24,27 +25,33 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 10px;
             overflow-x: hidden;
             touch-action: manipulation;
         }
 
         /* --- Puzzle Area --- */
-        #questionArea { width: 100%; display: flex; flex-direction: column; align-items: center; }
-        h1 { color: var(--text-red); font-style: italic; font-size: 1.2rem; text-align: center; margin: 10px 0; }
+        #questionArea { 
+            width: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        
+        h1 { color: var(--text-red); font-style: italic; font-size: 1.4rem; text-align: center; margin: 15px 0; }
 
-        .card {
+        .puzzle-card {
             width: 95%;
-            max-width: 450px;
+            max-width: 480px;
             background: white;
             border: 1px solid #ddd;
             text-align: center;
             padding: 10px;
             box-sizing: border-box;
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-            z-index: 2;
             margin: 10px auto;
+            border-radius: 10px;
         }
 
         .puzzle-board {
@@ -61,9 +68,10 @@
         .drop-zone { width: var(--piece-size); height: var(--piece-size); border: 1px solid #eee; }
 
         .pieces-pool {
-            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
-            width: 90%; margin-top: 10px; padding: 15px;
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+            width: 100%; max-width: 500px; margin-top: 15px; padding: 15px;
             background: rgba(255,255,255,0.4); border-radius: 20px; min-height: 100px;
+            box-sizing: border-box;
         }
 
         .piece {
@@ -71,6 +79,7 @@
             background-image: url('https://i.pinimg.com/736x/19/45/c1/1945c1082ae883afa246d71eeefe6c40.jpg'); 
             background-size: var(--board-width) var(--board-height);
             border: 1px solid #333; touch-action: none;
+            border-radius: 4px;
         }
 
         .p0 { background-position: 0 0; }
@@ -83,13 +92,14 @@
         .p7 { background-position: calc(var(--piece-size) * -3) calc(var(--piece-size) * -1); }
 
         .controls { margin-top: 20px; text-align: center; width: 100%; }
-        .btn-group { display: flex; gap: 15px; justify-content: center; height: 50px; position: relative; }
+        .btn-group { display: flex; gap: 15px; justify-content: center; height: 60px; position: relative; }
         
-        button { padding: 8px 20px; border: 2px solid #FAF7F7; border-radius: 15px; font-weight: bold; }
-        #noBtn { transition: all 0.2s ease; z-index: 10; }
-        .yes:not(:disabled) { background: linear-gradient(to right, #ff416c, #ff4b2b); color: white; cursor: pointer; }
-        .no:not(:disabled) { background-color: #F56767; color: whitesmoke; }
+        button { padding: 10px 25px; border: none; border-radius: 25px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.3s; }
+        #noBtn { transition: all 0.2s ease; z-index: 10; background-color: #F56767; color: white; }
+        .yes:not(:disabled) { background: linear-gradient(to right, #ff416c, #ff4b2b); color: white; }
+        button:disabled { background: #ccc; cursor: not-allowed; opacity: 0.6; }
 
+        /* --- Celebration Area --- */
         #celebration { 
             display: none; 
             position: fixed;
@@ -100,93 +110,74 @@
             justify-content: center;
             background: #F7EBF4;
             z-index: 100;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
-        #celebText { font-size: 1.5rem; color: black; text-shadow: 1px 1px gold; margin: 20px; text-align: center; }
-        #celebGif { border-radius: 20px; width: 80%; max-width: 250px; }
+        #celebText { font-size: 1.8rem; color: #a33131; margin-bottom: 20px; text-align: center; font-weight: bold; }
+        #celebGif { border-radius: 20px; width: 80%; max-width: 250px; margin-bottom: 20px; }
 
         /* --- Envelope --- */
         .envelope-wrapper {
             position: relative;
-            width: clamp(200px, 60vw, 300px);
+            width: clamp(260px, 80vw, 350px);
             aspect-ratio: 3/2;
             background: var(--envelope-color);
             cursor: pointer;
-            margin-top: 30px;
             transition: transform 0.6s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
-        /* The Flap */
         .envelope-wrapper:before {
             content: ""; position: absolute; top: 0; left: 0;
             width: 0; height: 0;
-            border-left: calc(clamp(200px, 60vw, 300px) / 2) solid transparent;
-            border-right: calc(clamp(200px, 60vw, 300px) / 2) solid transparent;
-            border-top: calc(clamp(200px, 60vw, 300px) * 0.4) solid var(--envelope-light);
+            border-left: clamp(130px, 40vw, 175px) solid transparent;
+            border-right: clamp(130px, 40vw, 175px) solid transparent;
+            border-top: clamp(100px, 30vw, 130px) solid var(--envelope-light);
             z-index: 5; transition: transform 0.5s; transform-origin: top;
         }
 
-        /* NEW: "Open Me" Text on Flap */
         .open-me-text {
-            position: absolute;
-            top: 10px;
-            color: white;
-            font-size: 0.9rem;
-            font-weight: bold;
-            z-index: 6;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            pointer-events: none;
-            transition: opacity 0.3s, transform 0.5s;
-            transform-origin: top;
+            position: absolute; top: 20px; color: white; font-size: 1rem;
+            font-weight: bold; z-index: 6; text-transform: uppercase;
+            pointer-events: none; transition: opacity 0.3s;
         }
 
         .envelope-wrapper.open:before { transform: rotateX(180deg); z-index: 0; }
-        .envelope-wrapper.open .open-me-text { 
-            transform: rotateX(180deg) translateY(20px); 
-            opacity: 0; 
-        }
-        
-        .envelope-wrapper.open { transform: translateY(20%); }
+        .envelope-wrapper.open .open-me-text { opacity: 0; }
 
-        /* "Stay Hot" Text inside */
-        .envelope-text {
+        /* --- Invitation Card (Hidden until open) --- */
+        .invitation-card {
+            display: none; /* Hidden initially */
+            background-color: #fff;
+            padding: 30px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 320px;
+            border: 1px solid #d4af37;
             position: absolute;
-            color: white;
-            font-family: 'Brush Script MT', cursive, sans-serif;
-            font-size: 1.8rem;
-            font-weight: bold;
+            z-index: 10;
             opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            z-index: 1;
+            transform: translateY(20px);
+            transition: all 0.8s ease;
         }
 
-        .envelope-wrapper.open .envelope-text { opacity: 1; }
-
-        .photo-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
-            pointer-events: none;
+        .envelope-wrapper.open .invitation-card {
+            display: block;
+            opacity: 1;
+            transform: translateY(-40px);
         }
 
-        .photo {
-            position: absolute;
-            width: clamp(100px, 30vw, 160px);
-            aspect-ratio: 1/1;
-            background: white; padding: 5px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            opacity: 0; transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .photo img { width: 100%; height: 100%; object-fit: cover; }
-
-        .envelope-wrapper.open .photo { opacity: 1; }
-        .envelope-wrapper.open .p1 { transform: translate(-50%, -120%) rotate(-10deg); }
-        .envelope-wrapper.open .p2 { transform: translate(20%, -140%) rotate(10deg); transition-delay: 0.2s; }
-        .envelope-wrapper.open .p3 { transform: translate(-80%, -100%) rotate(-5deg); transition-delay: 0.4s; }
+        .invitation-card h2 { color: #2c3e50; font-size: 1.2rem; margin: 0 0 10px; letter-spacing: 1px; }
+        .divider { width: 40px; height: 2px; background-color: #d4af37; margin: 15px auto; }
+        .details { color: #555; line-height: 1.6; font-size: 0.95rem; }
+        .highlight { font-weight: bold; color: #000; }
+        .rsvp { margin-top: 15px; font-style: italic; font-size: 0.8rem; color: #888; }
 
         .bg-hearts { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
     </style>
@@ -195,7 +186,7 @@
 
 <div id="questionArea">
     <h1>Solve the puzzle, my love! ❤️</h1>
-    <div class="card">
+    <div class="puzzle-card">
         <div class="puzzle-board" id="board">
             <div class="drop-zone" data-index="0"></div>
             <div class="drop-zone" data-index="1"></div>
@@ -214,23 +205,26 @@
             <button class="yes" id="yesBtn" onclick="celebrate()" disabled>YES🙊</button>
             <button class="no" id="noBtn" onmouseover="moveNoBtn()" onclick="moveNoBtn()" disabled>NO🙅🏻‍♂️</button>
         </div>
-        <p id="status-msg" style="font-size: 0.9rem;">Drag pieces into the box!</p>
+        <p id="status-msg" style="font-size: 0.9rem; margin-top: 10px;">Drag pieces into the box!</p>
     </div>
 </div>
 
 <div id="celebration">
-    <h1 id="celebText">I KNEW IT! ❤️ RAWWWWRRRRR👉🏾👌🏻</h1>
-    <img id="celebGif" src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZDhidHQ5aDI1dzA4cXhqY3R3cnB2Zjhpcm9iNzc5dGkzazZzajVtOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/124ySNrM8Rt8go/giphy.gif" alt="Happy Dance">
+    <h1 id="celebText">I KNEW IT! ❤️</h1>
+    <img id="celebGif" src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3NTR4bGc5NndqOGljYzY5NWc1ZDIxc2JheHl0c2JjOHk1ZzV3aWF5ZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/S24vAZeES2INy/giphy.gif" alt="Happy Dance">
     
     <div class="envelope-wrapper" id="envelope" onclick="openEnvelope()">
-        <div class="open-me-text">Open to me</div>
+        <div class="open-me-text">Tap to Open</div>
         
-        <div class="envelope-text">Stay hot Jellyhotch</div>
-        
-        <div class="photo-container">
-            <div class="photo p1"><img src="photo1.jpg" alt="Memory 1"></div>
-            <div class="photo p2"><img src="photo2.jpg" alt="Memory 2"></div>
-            <div class="photo p3"><img src="photo3.jpg" alt="Memory 3"></div>
+        <div class="invitation-card" id="inviteCard">
+            <h2>YOU'RE INVITED</h2>
+            <div class="divider"></div>
+            <div class="details">
+                <p><span class="highlight">DATE:</span> Saturday, March 14th</p>
+                <p><span class="highlight">TIME:</span> 7:30 PM</p>
+                <p><span class="highlight">Dinner @</span> <br>SM Seaside City Cebu</p>
+            </div>
+            <div class="rsvp">See you there!</div>
         </div>
     </div>
 </div>
@@ -238,7 +232,6 @@
 <div class="bg-hearts" id="bg-hearts"></div>
 
 <script>
-    // ... (All existing JavaScript remains the same)
     const pool = document.getElementById('pool');
     const yesBtn = document.getElementById('yesBtn');
     const noBtn = document.getElementById('noBtn');
@@ -246,6 +239,7 @@
     let solvedPieces = 0;
     const totalPieces = 8;
 
+    // Shuffle and Create Pieces
     const pieceIndices = [0, 1, 2, 3, 4, 5, 6, 7];
     pieceIndices.sort(() => Math.random() - 0.5);
 
@@ -256,14 +250,28 @@
         piece.id = `piece-${idx}`;
         piece.setAttribute('draggable', 'true');
         piece.addEventListener('dragstart', (e) => e.dataTransfer.setData('text', e.target.id));
+        
+        // Touch Support
         piece.addEventListener('touchstart', touchStart, {passive: false});
         piece.addEventListener('touchmove', touchMove, {passive: false});
         piece.addEventListener('touchend', touchEnd);
         pool.appendChild(piece);
     });
 
+    // Drag and Drop Logic
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('dragover', e => e.preventDefault());
+        zone.addEventListener('drop', e => {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text');
+            const piece = document.getElementById(id);
+            if (piece.dataset.index === zone.dataset.index) snapToZone(piece, zone);
+        });
+    });
+
     let activePiece = null;
     let offsetX, offsetY;
+
     function touchStart(e) {
         if(this.parentElement.classList.contains('drop-zone')) return;
         activePiece = this;
@@ -274,6 +282,7 @@
         activePiece.style.position = 'fixed';
         activePiece.style.zIndex = '1000';
     }
+
     function touchMove(e) {
         if (!activePiece) return;
         e.preventDefault();
@@ -281,12 +290,14 @@
         activePiece.style.left = (touch.clientX - offsetX) + 'px';
         activePiece.style.top = (touch.clientY - offsetY) + 'px';
     }
+
     function touchEnd(e) {
         if (!activePiece) return;
         activePiece.style.display = 'none';
         const el = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
         activePiece.style.display = 'block';
         const zone = el ? el.closest('.drop-zone') : null;
+
         if (zone && zone.dataset.index === activePiece.dataset.index && !zone.hasChildNodes()) {
             snapToZone(activePiece, zone);
         } else {
@@ -294,16 +305,6 @@
         }
         activePiece = null;
     }
-
-    document.querySelectorAll('.drop-zone').forEach(zone => {
-        zone.addEventListener('dragover', e => e.preventDefault());
-        zone.addEventListener('drop', e => {
-            e.preventDefault();
-            const id = e.dataTransfer.getData('text');
-            const piece = document.getElementById(id);
-            if (piece.dataset.index === zone.dataset.index) snapToZone(piece, zone);
-        });
-    });
 
     function snapToZone(piece, zone) {
         zone.appendChild(piece);
@@ -333,10 +334,18 @@
     }
 
     function openEnvelope() {
-        document.getElementById('celebText').style.display = 'none';
-        document.getElementById('celebGif').style.display = 'none';
-        document.getElementById('envelope').classList.add('open');
-        confetti({ particleCount: 80, spread: 50, origin: { y: 0.7 } });
+        const env = document.getElementById('envelope');
+        if(!env.classList.contains('open')) {
+            document.getElementById('celebText').style.opacity = '0';
+            document.getElementById('celebGif').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('celebText').style.display = 'none';
+                document.getElementById('celebGif').style.display = 'none';
+            }, 500);
+            
+            env.classList.add('open');
+            confetti({ particleCount: 100, spread: 60, origin: { y: 0.8 } });
+        }
     }
 
     function createHeart() {
@@ -345,7 +354,8 @@
         heart.style.position = 'fixed';
         heart.style.left = Math.random() * 100 + 'vw';
         heart.style.top = '100vh';
-        heart.style.fontSize = '15px';
+        heart.style.fontSize = Math.random() * 10 + 10 + 'px';
+        heart.style.zIndex = '-1';
         heart.style.transition = `transform ${Math.random() * 3 + 2}s linear`;
         document.getElementById('bg-hearts').appendChild(heart);
         setTimeout(() => heart.style.transform = `translateY(-110vh) rotate(360deg)`, 100);
